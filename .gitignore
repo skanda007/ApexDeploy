@@ -1,0 +1,89 @@
+# =========================================================
+# ApexDeploy - Git Ignore Rules
+# =========================================================
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+*.whl
+pip-log.txt
+pip-delete-this-directory.txt
+
+# --- Virtual Environments ---
+.venv/
+venv/
+ENV/
+env/
+
+# --- Environment ---
+.env
+.env.local
+.env.production
+
+# --- IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# --- Testing ---
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+nosetests.xml
+coverage.xml
+
+# --- Logs ---
+logs/*.log
+logs/**/*.log
+
+# --- Database ---
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+
+# --- Workspaces (cloned repos) ---
+workspaces/*/
+
+# --- Artifacts (generated outputs) ---
+artifacts/git/*
+artifacts/code_review/*
+artifacts/testing/*
+artifacts/security/*
+artifacts/docker/*
+artifacts/deployments/*
+artifacts/monitoring/*
+artifacts/rollback/*
+artifacts/reports/*
+artifacts/dockerfiles/*
+artifacts/screenshots/*
+!artifacts/**/.gitkeep
+
+# --- Docker ---
+*.pid
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- Misc ---
+*.bak
+*.tmp
+*.temp
+*.orig

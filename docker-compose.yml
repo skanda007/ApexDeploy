@@ -1,0 +1,61 @@
+# =========================================================
+# ApexDeploy - Docker Compose
+# Autonomous Git-to-Cloud Resilience Engineer
+# =========================================================
+
+services:
+  # --- FastAPI Backend ---
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: apexdeploy-api
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./artifacts:/app/artifacts
+      - ./workspaces:/app/workspaces
+      - /var/run/docker.sock:/var/run/docker.sock  # Docker-in-Docker access
+    env_file:
+      - .env
+    environment:
+      - APP_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - apexdeploy-network
+
+  # --- Streamlit Dashboard ---
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: apexdeploy-dashboard
+    ports:
+      - "${DASHBOARD_PORT:-8501}:8501"
+    environment:
+      - API_URL=http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - apexdeploy-network
+
+networks:
+  apexdeploy-network:
+    driver: bridge
+    name: apexdeploy-network
