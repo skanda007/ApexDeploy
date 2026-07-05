@@ -31,8 +31,14 @@ render_sidebar()
 
 API_URL = "http://localhost:8000"
 
-st.title("🔄 Pipeline Runs")
-st.caption("Inspect pipeline steps, execution times, quality gate statuses, and rollback events.")
+col1, col2 = st.columns([5, 1])
+with col1:
+    st.title("🔄 Pipeline Runs")
+    st.caption("Inspect pipeline steps, execution times, quality gate statuses, and rollback events.")
+with col2:
+    st.markdown("<div style='height: 25px;'></div>", unsafe_allow_html=True)
+    if st.button("🔄 Refresh", use_container_width=True):
+        st.rerun()
 
 # Fetch pipeline runs
 try:

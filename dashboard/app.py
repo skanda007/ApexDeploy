@@ -191,11 +191,11 @@ if runs:
             "Repository": r.get("repo_name", "—"),
             "Trigger": r.get("trigger", "—"),
             "Started At": started,
-            "Duration (s)": round(r["duration_seconds"], 1) if r.get("duration_seconds") else "—",
+            "Duration (s)": round(r["duration_seconds"], 1) if r.get("duration_seconds") else None,
             "Status": r["status"].upper()
         })
 
-    st.dataframe(pd.DataFrame(data_list), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(data_list), width='stretch', hide_index=True)
 else:
     st.info("No pipeline activity yet. Register a repository and trigger a pipeline to get started!")
 

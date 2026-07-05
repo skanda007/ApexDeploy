@@ -66,11 +66,16 @@ class BaseAgent(ABC):
             self.logger.info(f"Successfully completed agent: {self.name} in {duration:.4f}s")
             self.set_status("completed")
             
+            artifact_path = None
+            if isinstance(results, dict):
+                artifact_path = results.get("artifact_path")
+            
             return {
                 "agent": self.name,
                 "status": "completed",
                 "duration_seconds": duration,
                 "results": results,
+                "artifact_path": artifact_path,
                 "error": None
             }
             

@@ -60,17 +60,7 @@ data/*.sqlite3
 workspaces/*/
 
 # --- Artifacts (generated outputs) ---
-artifacts/git/*
-artifacts/code_review/*
-artifacts/testing/*
-artifacts/security/*
-artifacts/docker/*
-artifacts/deployments/*
-artifacts/monitoring/*
-artifacts/rollback/*
-artifacts/reports/*
-artifacts/dockerfiles/*
-artifacts/screenshots/*
+artifacts/**/*
 !artifacts/**/.gitkeep
 
 # --- Docker ---

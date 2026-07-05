@@ -36,6 +36,22 @@ def run_container(
     full_image = f"{image_name}:{image_tag}"
     logger.info(f"Running container from image '{full_image}'")
 
+    from src.config.settings import settings
+    import sys
+    if getattr(settings, "SIMULATE_DOCKER", False) and "pytest" not in sys.modules:
+        logger.info(f"[SIMULATION] Mocking run_container for image: {full_image}")
+        host_port = None
+        if ports:
+            for c_port, h_port in ports.items():
+                host_port = h_port
+        return {
+            "container_id": "mock-container-id-123456789",
+            "container_name": container_name or f"mock-{image_name.split('/')[-1]}",
+            "status": "running",
+            "host_port": host_port,
+            "ports": {f"{host_port}/tcp": [{"HostIp": "0.0.0.0", "HostPort": str(host_port)}]} if host_port else {},
+        }
+
     if not is_docker_available():
         raise DockerException("Docker daemon not available. Cannot run container.")
 
@@ -112,6 +128,12 @@ def stop_container(container_id_or_name: str, timeout: int = 10) -> bool:
     """
     logger.info(f"Stopping container: {container_id_or_name}")
 
+    from src.config.settings import settings
+    import sys
+    if getattr(settings, "SIMULATE_DOCKER", False) and "pytest" not in sys.modules:
+        logger.info(f"[SIMULATION] Mocking stop_container for: {container_id_or_name}")
+        return True
+
     if not is_docker_available():
         return False
 
@@ -138,6 +160,12 @@ def remove_container(container_id_or_name: str, force: bool = False) -> bool:
     """
     logger.info(f"Removing container: {container_id_or_name}")
 
+    from src.config.settings import settings
+    import sys
+    if getattr(settings, "SIMULATE_DOCKER", False) and "pytest" not in sys.modules:
+        logger.info(f"[SIMULATION] Mocking remove_container for: {container_id_or_name}")
+        return True
+
     if not is_docker_available():
         return False
 
@@ -161,6 +189,24 @@ def get_container_status(container_id_or_name: str) -> Dict[str, Any]:
     Returns:
         Dict with keys: id, name, status, ports, created_at, started_at, error, env.
     """
+    from src.config.settings import settings
+    import sys
+    if getattr(settings, "SIMULATE_DOCKER", False) and "pytest" not in sys.modules:
+        logger.info(f"[SIMULATION] Mocking get_container_status for: {container_id_or_name}")
+        return {
+            "id": "mock-container-id-123456789",
+            "short_id": "mock-container",
+            "name": container_id_or_name,
+            "status": "running",
+            "created_at": "2026-07-05T12:00:00Z",
+            "started_at": "2026-07-05T12:00:05Z",
+            "finished_at": "",
+            "exit_code": 0,
+            "ports": {},
+            "env": ["APP_ENV=production"],
+            "image": "mock-image:latest",
+        }
+
     if not is_docker_available():
         return {"status": "unknown", "error": "Docker daemon unavailable"}
 

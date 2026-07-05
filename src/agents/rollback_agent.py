@@ -256,6 +256,7 @@ class RollbackAgent(BaseAgent):
                 content=json.dumps(report, indent=2)
             )
 
+            report["artifact_path"] = artifact_file
             return report
 
         except Exception as e:

@@ -163,7 +163,7 @@ if runs:
             "Repository": r["repo_name"],
             "Trigger": r["trigger"],
             "Started At": started,
-            "Duration (s)": round(r["duration_seconds"], 1) if r["duration_seconds"] else "N/A",
+            "Duration (s)": round(r["duration_seconds"], 1) if r["duration_seconds"] else None,
             "Status": r["status"]
         })
         
@@ -171,7 +171,7 @@ if runs:
     # Using streamlit dataframe
     st.dataframe(
         df_table,
-        use_container_width=True,
+        width='stretch',
         column_config={
             "Status": st.column_config.TextColumn(
                 "Status",

@@ -137,6 +137,7 @@ class CodeReviewAgent(BaseAgent):
                 content=json.dumps(report_data, indent=2)
             )
 
+            report_data["artifact_path"] = artifact_file
             return report_data
 
         except Exception as e:

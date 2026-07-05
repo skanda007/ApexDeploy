@@ -434,6 +434,7 @@ async def test_security_agent_failed_quality_gate(mock_execute, mock_generate_js
     """Verify SecurityAgent fails quality gate if score drops below 70."""
     monkeypatch.setattr(settings, "ARTIFACTS_DIR", str(tmp_path / "artifacts"))
     monkeypatch.setattr(settings, "WORKSPACES_DIR", str(tmp_path / "workspaces"))
+    monkeypatch.setattr(settings, "SECURITY_SCORE_THRESHOLD", 70)
 
     mock_execute.return_value = {
         "exit_code": 0,

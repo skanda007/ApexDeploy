@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 
 from src.core.base_agent import BaseAgent
 from src.core.exceptions import AgentException
+from src.config.settings import settings
 from src.llm.gemini_client import generate_structured_json
 from src.llm.prompts import SECURITY_SYSTEM_INSTRUCTION, SECURITY_USER_PROMPT
 from src.mcp import execute_command, write_file, read_file, search_files
@@ -119,8 +120,8 @@ class SecurityAgent(BaseAgent):
             # Validate and convert back to dictionary
             report_data = SecurityReport(**raw_report).model_dump()
 
-            # Enforce pipeline fail state if LLM score is below 70
-            if report_data["security_score"] < 70:
+            # Enforce pipeline fail state if LLM score is below the threshold
+            if report_data["security_score"] < settings.SECURITY_SCORE_THRESHOLD:
                 report_data["security_status"] = "failed"
 
             # 6. Save security report under artifacts folder
@@ -131,6 +132,7 @@ class SecurityAgent(BaseAgent):
                 content=json.dumps(report_data, indent=2)
             )
 
+            report_data["artifact_path"] = artifact_file
             return report_data
 
         except Exception as e:

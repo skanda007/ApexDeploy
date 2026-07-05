@@ -43,7 +43,7 @@ async def list_pipeline_runs():
                 """
                 SELECT pr.*, r.name as repo_name 
                 FROM pipeline_runs pr
-                JOIN repositories r ON pr.repo_id = r.id
+                LEFT JOIN repositories r ON pr.repo_id = r.id
                 ORDER BY pr.started_at DESC
                 """
             ) as cursor:

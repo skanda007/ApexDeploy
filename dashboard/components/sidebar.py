@@ -17,7 +17,7 @@ def render_sidebar():
 
     # 1. API Health Check
     try:
-        response = requests.get(f"{API_URL}/api/health/details", timeout=1.5)
+        response = requests.get(f"{API_URL}/api/health/details", timeout=5)
         if response.status_code == 200:
             health_data = response.json()
             st.sidebar.markdown(
@@ -39,6 +39,32 @@ def render_sidebar():
             st.sidebar.progress(mem / 100.0)
         else:
             raise Exception("API returned non-200 status")
+    except requests.exceptions.Timeout:
+        # Detailed check timed out — try simple health ping as fallback
+        try:
+            simple = requests.get(f"{API_URL}/api/health", timeout=2)
+            if simple.status_code == 200:
+                st.sidebar.markdown(
+                    '**Backend API:** <span class="status-badge-online">● ONLINE</span>',
+                    unsafe_allow_html=True
+                )
+                st.sidebar.info("Backend running (detailed metrics unavailable)")
+                cpu = psutil.cpu_percent()
+                mem = psutil.virtual_memory().percent
+                st.sidebar.markdown("---")
+                st.sidebar.markdown("### Host Performance")
+                st.sidebar.write(f"🖥️ CPU Usage: **{cpu}%**")
+                st.sidebar.progress(cpu / 100.0)
+                st.sidebar.write(f"💾 Memory Usage: **{mem}%**")
+                st.sidebar.progress(mem / 100.0)
+            else:
+                raise Exception("Simple health check failed")
+        except Exception:
+            st.sidebar.markdown(
+                '**Backend API:** <span class="status-badge-offline">○ OFFLINE</span>',
+                unsafe_allow_html=True
+            )
+            st.sidebar.error("FastAPI Backend not responding on Port 8000.")
     except Exception:
         st.sidebar.markdown(
             '**Backend API:** <span class="status-badge-offline">○ OFFLINE</span>',

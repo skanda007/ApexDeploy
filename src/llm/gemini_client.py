@@ -6,8 +6,9 @@
 import asyncio
 import json
 import logging
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, List, Optional, Type
 from pydantic import BaseModel
+from pydantic.fields import PydanticUndefined
 
 from google import genai
 from google.genai import types
@@ -17,6 +18,38 @@ from src.config.settings import settings
 from src.llm.safety import get_safety_settings
 
 logger = logging.getLogger("llm.gemini")
+
+
+def _build_mock_dict(schema: Type[BaseModel]) -> Dict[str, Any]:
+    """Builds a complete, Pydantic-valid fallback dict for any BaseModel schema.
+    Introspects model_fields to provide sensible defaults for every field,
+    including required ones that have no declared default value.
+    """
+    result: Dict[str, Any] = {}
+    for field_name, field_info in schema.model_fields.items():
+        # 1. Use declared default if present
+        if field_info.default is not PydanticUndefined:
+            result[field_name] = field_info.default
+        # 2. Use default_factory if present (e.g. default_factory=list)
+        elif field_info.default_factory is not None:
+            result[field_name] = field_info.default_factory()
+        else:
+            # 3. Derive a safe default from the annotation type
+            ann = field_info.annotation
+            origin = getattr(ann, "__origin__", None)
+            if ann in (str, Optional[str]) or ann is str:
+                result[field_name] = "mock"
+            elif ann in (bool, Optional[bool]) or ann is bool:
+                result[field_name] = False
+            elif ann in (int, Optional[int]) or ann is int:
+                result[field_name] = 0
+            elif ann in (float, Optional[float]) or ann is float:
+                result[field_name] = 0.0
+            elif origin is list or ann is list:
+                result[field_name] = []
+            else:
+                result[field_name] = None
+    return result
 
 
 def get_genai_client() -> genai.Client:
@@ -84,9 +117,12 @@ async def generate_structured_json(
     logger.info(f"Generating structured JSON content for model: {response_schema.__name__}")
     
     if not settings.GOOGLE_API_KEY:
-        logger.warning("No GOOGLE_API_KEY set. Returning mock fallback schema.")
-        # Attempt to return a basic default dictionary matching the model schema
-        return response_schema.model_construct().model_dump()
+        logger.warning(
+            "GOOGLE_API_KEY is not set. Gemini call skipped — returning mock fallback for %s. "
+            "Set GOOGLE_API_KEY in your .env file to enable real AI analysis.",
+            response_schema.__name__,
+        )
+        return _build_mock_dict(response_schema)
         
     try:
         client = get_genai_client()
@@ -116,6 +152,6 @@ async def generate_structured_json(
     except Exception as e:
         logger.error(f"Gemini structured generation failed: {e}", exc_info=True)
         if settings.APP_ENV == "development":
-            # Return parsed model defaults as fallback
-            return response_schema.model_construct().model_dump()
+            logger.warning("Development mode: returning mock fallback for %s after error.", response_schema.__name__)
+            return _build_mock_dict(response_schema)
         raise

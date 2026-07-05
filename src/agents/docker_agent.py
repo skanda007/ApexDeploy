@@ -123,7 +123,8 @@ class DockerAgent(BaseAgent):
                 "size_bytes": 0,
                 "dockerfile_content": docker_config.dockerfile_content,
                 "compose_content": docker_config.compose_content,
-                "build_logs": ["Docker daemon unavailable. Skipping actual image build."]
+                "build_logs": ["Docker daemon unavailable. Skipping actual image build."],
+                "artifact_path": f"{artifacts_dir}/Dockerfile"
             }
 
         # 7. Perform build
@@ -137,10 +138,13 @@ class DockerAgent(BaseAgent):
             )
 
             if not build_res.success:
-                logger.error(f"Docker image build failed: {build_res.error_message}")
+                error_msg = build_res.error_message
+                if "non-zero code" in error_msg or "pip" in error_msg or "apt" in error_msg:
+                    error_msg += " (Tip: This build failure is likely due to network/DNS resolution issues in your Docker/WSL2 container. Please verify that your local Docker engine has internet access, or set a fixed DNS like 8.8.8.8 under Docker Desktop -> Settings -> Resources -> Network.)"
+                logger.error(f"Docker image build failed: {error_msg}")
                 # We raise AgentException to mark pipeline run stage as failed
                 raise AgentException(
-                    f"Docker image build failed: {build_res.error_message}",
+                    f"Docker image build failed: {error_msg}",
                     details={"build_logs": build_res.build_logs}
                 )
 
@@ -161,7 +165,8 @@ class DockerAgent(BaseAgent):
                 "size_bytes": build_res.size_bytes,
                 "dockerfile_content": docker_config.dockerfile_content,
                 "compose_content": docker_config.compose_content,
-                "build_logs": build_res.build_logs
+                "build_logs": build_res.build_logs,
+                "artifact_path": f"{artifacts_dir}/docker_build.log"
             }
 
         except AgentException:

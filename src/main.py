@@ -4,6 +4,12 @@
 # =========================================================
 
 import logging
+import platform
+import asyncio
+
+if platform.system().lower() == "windows":
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware

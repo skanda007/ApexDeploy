@@ -40,6 +40,7 @@ class Settings(BaseSettings):
     DOCKER_TIMEOUT: int = 120
     DOCKER_REGISTRY: str = ""
     DOCKER_NETWORK: str = "apexdeploy-network"
+    SIMULATE_DOCKER: bool = False
 
     # Git
     GIT_CLONE_DEPTH: int = 1
@@ -61,6 +62,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "change-this-to-a-random-secret-key"
     ALLOWED_HOSTS: str = "localhost,127.0.0.1"
     CORS_ORIGINS: str = "http://localhost:8501,http://localhost:8000"
+    SECURITY_SCORE_THRESHOLD: int = 70
 
     # Monitoring
     HEALTH_CHECK_INTERVAL: int = 30

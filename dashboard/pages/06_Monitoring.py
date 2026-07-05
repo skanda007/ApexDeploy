@@ -199,6 +199,6 @@ if snapshots:
                          "http_status", "latency_ms", "container_status", "health_score"]].copy()
         display_df.columns = ["Timestamp", "CPU %", "Memory MB", "Memory %",
                               "HTTP Status", "Latency ms", "Container", "Health"]
-        st.dataframe(display_df, use_container_width=True)
+        st.dataframe(display_df, width='stretch')
 else:
     st.info("No monitoring snapshots recorded for this deployment. Monitoring captures happen during pipeline runs.")

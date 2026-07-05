@@ -225,9 +225,11 @@ async def test_pipeline_failed_quality_gate(
     mock_changed,
     mock_gemini,
     mock_test_execute,
-    tmp_path
+    tmp_path,
+    monkeypatch
 ):
     """Verify that failing a quality gate halts downstream execution and fails the pipeline."""
+    monkeypatch.setattr(settings, "SECURITY_SCORE_THRESHOLD", 70)
     orchestrator.initialize()
 
     # Create the workspace directory so CodeReviewAgent can scan it
